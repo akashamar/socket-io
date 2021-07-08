@@ -11,10 +11,6 @@ function App() {
   const [videos, setVideos] = useState("");
 
   useEffect(() => {
-    socket.on("videotrack", (videotracks) => {
-      console.log(videotracks);
-    });
-
     // socket.on('img', (image) => {
     //   console.log(image)
     //   setImgData(image.img)
@@ -38,9 +34,22 @@ function App() {
   navigator.mediaDevices
     .getUserMedia({ audio: true, video: true })
     .then(function (stream) {
-      console.log(stream.getVideoTracks()[0]);
+      const recorder = new MediaRecorder(stream);
+
+      recorder.ondataavailable = (event) => {
+        const blob = event.data;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          socket.emit("videotrack", reader.result);
+        };
+        reader.readAsDataURL(blob);
+      };
+
+      recorder.start(1000);
+
       // socket.emit('videotrack', JSON.stringify(stream))
-      var video = document.getElementById("video-track");
+      let video = document.getElementById("video-track");
       // Older browsers may not have srcObject
       if ("srcObject" in video) {
         video.srcObject = stream;
@@ -64,7 +73,7 @@ function App() {
       {/*<input type="file" onChange={getFile}/>*/}
       {/*<img style={{width: "50vw", height: "70vh"}} src={imgData} alt="img"/>*/}
       {/*<video controls src={`data:video/mp4;base64,${}`} />*/}
-      <video src={videos} controls autoPlay={true} />
+      <video controls autoPlay={true} id="receive_video" />
       <video id="video-track" />
     </div>
   );

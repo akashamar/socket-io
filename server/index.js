@@ -23,9 +23,7 @@ io.on("connection", (socket) => {
   // })
 
   socket.on("videotrack", (videotracks) => {
-    console.log("got video tracks");
-    console.log(videotracks);
-    socket.emit("videotrack", videotracks);
+    console.log("got tracks");
   });
 
   // socket.on('img', (image) => {
