@@ -1,5 +1,6 @@
 const app = require("express")();
 const http = require("http").createServer(app);
+const child_process = require("child_process");
 const io = require("socket.io")(http, {
   cors: {
     origin: "*",
@@ -22,8 +23,39 @@ io.on("connection", (socket) => {
   //   io.emit('message', {name, message})
   // })
 
+  const ffmpeg = child_process.spawn("ffmpeg", [
+    "-f",
+    "lavfi",
+    "-i",
+    "anullsrc",
+    "-i",
+    "-",
+    "-vcodec",
+    "libx264",
+    "-acodec",
+    "aac",
+    "-f",
+    "flv",
+    "rtmp://192.168.43.124/live/test",
+  ]);
+
+  ffmpeg.on("close", (code, signal) => {
+    console.log(
+      "FFmpeg child process closed, code " + code + ", signal " + signal
+    );
+  });
+
+  ffmpeg.stdin.on("error", (e) => {
+    console.log("FFmpeg STDIN Error", e);
+  });
+
+  ffmpeg.stderr.on("data", (data) => {
+    console.log("FFmpeg STDERR:", data.toString());
+  });
+
   socket.on("videotrack", (videotracks) => {
-    console.log("got tracks");
+    // console.log("got tracks");
+    ffmpeg.stdin.write(videotracks);
   });
 
   // socket.on('img', (image) => {
