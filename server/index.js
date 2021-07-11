@@ -24,10 +24,6 @@ io.on("connection", (socket) => {
   // })
 
   const ffmpeg = child_process.spawn("ffmpeg", [
-    "-f",
-    "lavfi",
-    "-i",
-    "anullsrc",
     "-i",
     "-",
     "-vcodec",
@@ -54,8 +50,10 @@ io.on("connection", (socket) => {
   });
 
   socket.on("videotrack", (videotracks) => {
-    // console.log("got tracks");
+    //console.log("got tracks");
     ffmpeg.stdin.write(videotracks);
+    const fileBuffer = new Buffer(videotracks, "base64");
+    fs.writeFileSync("./video.webm", fileBuffer);
   });
 
   // socket.on('img', (image) => {

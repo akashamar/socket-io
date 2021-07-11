@@ -38,7 +38,7 @@ function App() {
 
       recorder.ondataavailable = (event) => {
         const blob = event.data;
-        // console.log(event)
+        console.log(blob);
         socket.emit("videotrack", blob);
       };
 
